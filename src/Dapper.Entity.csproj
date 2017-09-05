@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Title>Dapper.Entity</Title>    
+    <AssemblyName>Dapper.Entity</AssemblyName>
+    <Description>Trivial micro-orm implemented on Dapper, provides with CRUD helpers.</Description>
+    <Authors>Anton Heryanto</Authors>
+    <Copyright>2011- 2017 Anton Heryanto</Copyright>
+    <TargetFrameworks>net40;net45;net46;netstandard1.3;netstandard2.0</TargetFrameworks>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <PackageId>MySqlConnector</PackageId>
+    <PackageTags>orm;sql;micro-orm</PackageTags>
+    <PackageTags>orm;sql;micro-orm;dapper;mysql</PackageTags>
+    <PackageReleaseNotes>https://github.com/antonheryanto/dapper-entity</PackageReleaseNotes>
+    <PackageProjectUrl>https://github.com/antonheryanto/dapper-entity</PackageProjectUrl>
+    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/antonheryanto/dapper-entity.git</RepositoryUrl>
+    <GenerateDocumentationFile Condition="'$(Configuration)'=='Release'">true</GenerateDocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <IncludeSymbols>false</IncludeSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+    <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net40'">$(MONO_BASE_PATH)/4.0-api</FrameworkPathOverride>
+    <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net45'">$(MONO_BASE_PATH)/4.5-api</FrameworkPathOverride>
+    <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net46'">$(MONO_BASE_PATH)/4.6-api</FrameworkPathOverride>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="1.50.2" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40' OR '$(TargetFramework)' == 'net45' OR '$(TargetFramework)' == 'net46'">
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' OR '$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.CSharp" Version="4.4.0" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' == 'net40'">
+    <Compile Remove="*.Async.cs" />
+  </ItemGroup>
+  
+  <!-- <Target Name="DisplayMessages" BeforeTargets="Build">  
+    <Message Importance="high" Text="Test Message $(TargetFrameworkRootPath)" />
+  </Target>   -->
+
+</Project>
