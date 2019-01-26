@@ -3,40 +3,58 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Xunit;
-using System.Data.Common;
+using Microsoft.EntityFrameworkCore;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace Dapper.Entity.Tests
 {
     public class DatabaseTest
     {
-        protected readonly Db db;
-        private readonly string cs;
-        private readonly DbConnection cn;
-
-        public IConfigurationRoot Configuration { get; set; }
+        protected readonly DbContextOptions _option;
 
         public DatabaseTest()
         {
-            var builder = new ConfigurationBuilder()
+            var cs = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json",
-                optional: true, reloadOnChange: true);
-            Configuration = builder.Build();
+                optional: true, reloadOnChange: true)
+                .Build()
+                .GetConnectionString("db");                
+            _option = new DbContextOptionsBuilder<Db>()
+                .UseMySql(cs)
+                .Options;         
+        }
 
-            cs = Configuration.GetConnectionString("db");                        
-            cn = new System.Data.SqlClient.SqlConnection(cs);
-            db = Db.Init(cn, 30);
+        async Task InitDb()
+        {
+            using (var db = new Db(_option)) {
+                await db.ExecuteAsync(@"
+DROP TABLE IF EXISTS `Menu`;
+create table Menu (
+    `Id` int(11) NOT NULL AUTO_INCREMENT,
+    `Url` varchar(255) DEFAULT NULL,
+    PRIMARY KEY (`Id`)
+);                
+insert into Menu values(NULL, '#');
+                ");
+            }
         }
 
         [Fact] 
-        public void ConnectionStringTest() => Assert.False(cs is null, "not found");
+        public async Task ConnectionTest() 
+        {
+            await InitDb();
+            using (var db = new Db(_option)) {
+                var cn = db.Database.GetDbConnection();
+                Assert.False(cn is null, $"string {cn} {cn?.State}");
+            }
+        }
 
         [Fact] 
-        public void ConnectionTest() => Assert.False(cn is null, $"string {cn} {cn?.State}");
-
-        [Fact] 
-        public void DbTest() => Assert.False(db is null, "cannot init");
-            
-        [Fact] 
-        public void QueryTest() => Assert.True(db.Query("select 1").Any(), "should has value");
+        public async Task QueryTest()
+        {
+            using (var db = new Db(_option)) {
+                Assert.True((await db.QueryAsync("select 1")).Any(), "should has value");
+            }
+        } 
     }
 }

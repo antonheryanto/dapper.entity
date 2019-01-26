@@ -1,10 +1,12 @@
 using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dapper.Entity.Tests
 {
-    public class Db : Database<Db>
+    public class Db : Database
     {
-        public Table<Menu> Menu { get; set; }
+        public Db(DbContextOptions options) : base(options) {}
+        public DbSet<Menu> Menu { get; set; }
     }
 
     public class Menu
