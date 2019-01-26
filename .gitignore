@@ -3,5 +3,6 @@
 *.swp
 appsettings*.json
 .vs
+.nupkg
 bin
 obj

@@ -4,15 +4,15 @@
     <Title>Dapper.Entity</Title>    
     <AssemblyName>Dapper.Entity</AssemblyName>
     <Description>Dapper Helper For Entity Framework Core based on Dapper Rainbow</Description>
-    <Authors>Anton Heryanto</Authors>
-    <Copyright>2019 Anton Heryanto</Copyright>
+    <Authors>Anton Heryanto Hasan</Authors>
+    <Copyright>2019 Anton Heryanto Hasan</Copyright>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionPrefix>0.2.0</VersionPrefix>
     <PackageId>Dapper.Entity</PackageId>
     <PackageTags>orm;sql;micro-orm;dapper;efcore</PackageTags>
     <PackageReleaseNotes>https://github.com/antonheryanto/dapper.entity</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/antonheryanto/dapper.entity</PackageProjectUrl>
-    <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/antonheryanto/dapper.entity.git</RepositoryUrl>
     <GenerateDocumentationFile Condition="'$(Configuration)'=='Release'">true</GenerateDocumentationFile>
