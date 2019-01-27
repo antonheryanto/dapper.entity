@@ -1,8 +1,8 @@
 *.suo
 *.user
 *.swp
+*.nupkg
 appsettings*.json
 .vs
-.nupkg
 bin
 obj

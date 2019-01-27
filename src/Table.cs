@@ -17,8 +17,6 @@ namespace Dapper.Entity
 {
     public partial class Database : DbContext
     {
-        public Database(DbContextOptions options, bool lowerCaseTable = false) : base(options) {}
-
         public async Task<List<T>> AllAsync<T>(object where = null) where T : class
         {
             var tableName = GetTableName<T>();
@@ -148,8 +146,10 @@ ON DUPLICATE KEY UPDATE `{k}` = LAST_INSERT_ID(`{k}`), {cols_update}; SELECT LAS
             var type = typeof(T);
             if (tableNameMap.TryGetValue(type, out string name)) return name;
             
-            name = Model.FindEntityType(type).Relational().TableName;
-            tableNameMap[typeof(T)] = name;
+            name = Model.FindEntityType(type).Relational().TableName;            
+            if (_lowerCaseTable) name = name?.ToLower();
+
+            tableNameMap[type] = name;
             return name;
         }
 

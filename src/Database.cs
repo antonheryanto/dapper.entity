@@ -18,9 +18,20 @@ namespace Dapper.Entity
 {
     public partial class Database : DbContext
     {
+        bool _lowerCaseTable;
+        Func<DatabaseFacade, DbConnection> _connectionFn = (db) => db.GetDbConnection();
+        public Database(DbContextOptions options, 
+            Func<DbConnection, DbConnection> dbWrapper = null,
+            bool lowerCaseTable = false) : base(options)
+        {
+            _lowerCaseTable = lowerCaseTable;
+            if (dbWrapper != null)
+                _connectionFn = (db) => dbWrapper(Database.GetDbConnection());
+        }
+
         public Database(DbContextOptions options) : base(options) {}
 
-        public DbConnection cn() => Database.GetDbConnection();
+        public DbConnection cn() => _connectionFn(Database);
 
         public DbTransaction tx() => Database.CurrentTransaction?.GetDbTransaction();
 
