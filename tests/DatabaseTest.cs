@@ -24,17 +24,16 @@ namespace Dapper.Entity.Tests
                 .Options;         
         }
 
-        async Task InitDb()
+        protected async Task InitDb()
         {
             using (var db = new Db(_option)) {
                 await db.ExecuteAsync(@"
-DROP TABLE IF EXISTS `Menu`;
-create table Menu (
+CREATE TABLE IF NOT EXISTS `Menu` (
     `Id` int(11) NOT NULL AUTO_INCREMENT,
     `Url` varchar(255) DEFAULT NULL,
     PRIMARY KEY (`Id`)
-);                
-insert into Menu values(NULL, '#');
+)ENGINE=MEMORY;
+TRUNCATE Menu;
                 ");
             }
         }
@@ -50,10 +49,18 @@ insert into Menu values(NULL, '#');
         }
 
         [Fact] 
-        public async Task QueryTest()
+        public async Task QueryAsyncTest()
         {
             using (var db = new Db(_option)) {
                 Assert.True((await db.QueryAsync("select 1")).Any(), "should has value");
+            }
+        } 
+
+        [Fact] 
+        public async Task ExecuteAsyncTest()
+        {
+            using (var db = new Db(_option)) {
+                Assert.True((await db.ExecuteAsync("Insert Into Menu Values(NULL, '#')")) == 1, "row changes");
             }
         } 
     }

@@ -43,7 +43,7 @@ namespace Dapper.Entity
 
         public static async Task<long> InsertOrUpdateAsync<T>(
             this DbSet<T> dbSet, object key, object data) where T : class
-            => await dbSet.InsertOrUpdateAsync(key, data);
+            => await dbSet.GetDbContext().InsertOrUpdateAsync<T>(key, data);
 
         public static async Task<long> InsertOrUpdateAsync<T>(
             this DbSet<T> dbSet, long id, object data) where T : class
@@ -51,11 +51,11 @@ namespace Dapper.Entity
 
         public static async Task<long> InsertOrUpdateAsync<T>(
             this DbSet<T> dbSet, object data) where T : class
-            => await dbSet.InsertOrUpdateAsync(data);
+            => await dbSet.GetDbContext().InsertOrUpdateAsync<T>(data);
 
         public static async Task<int> UpdateAsync<T>(
             this DbSet<T> dbSet, object where, object data) where T : class
-            => await dbSet.UpdateAsync(where, data);
+            => await dbSet.GetDbContext().UpdateAsync<T>(where, data);
 
         public static async Task<int> UpdateAsync<T>(
             this DbSet<T> dbSet, long id, object data) where T : class
@@ -63,10 +63,10 @@ namespace Dapper.Entity
 
         public static async Task<bool> DeleteAsync<T>(
             this DbSet<T> dbSet, long id) where T : class
-            => await dbSet.DeleteAsync(id);
+            => await dbSet.GetDbContext().DeleteAsync<T>(id);
 
         public static async Task<bool> DeleteAsync<T>(
             this DbSet<T> dbSet, object where) where T : class
-            => await dbSet.DeleteAsync(where);
+            => await dbSet.GetDbContext().DeleteAsync<T>(where);
     }
 }
