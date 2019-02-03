@@ -31,9 +31,9 @@ namespace Dapper.Entity
 
         public Database(DbContextOptions options) : base(options) {}
 
-        public DbConnection cn() => _connectionFn(Database);
+        DbConnection cn() => _connectionFn(Database);
 
-        public DbTransaction tx() => Database.CurrentTransaction?.GetDbTransaction();
+        DbTransaction tx() => Database.CurrentTransaction?.GetDbTransaction();
 
         public async Task<List<dynamic>> QueryAsync(string sql, object param = null)
             => (await cn().QueryAsync(sql, param, tx())).AsList();
