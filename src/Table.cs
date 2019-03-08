@@ -60,8 +60,9 @@ namespace Dapper.Entity
         public async Task<long> InsertOrUpdateAsync<T>(object key, object data) where T : class
         {
             var tableName = GetTableName<T>();
+            string k = GetParamNames(key).Single();  
             var paramNames = GetParamNames(data);
-            string k = GetParamNames(key).Single();
+            paramNames.Remove(k);
             string cols = string.Join("`,`", paramNames);
             string cols_params = string.Join(",", paramNames.Select(p => "@" + p));
             string cols_update = string.Join(",", paramNames.Select(p => $"`{p}` = @{p}"));
@@ -75,7 +76,7 @@ ON DUPLICATE KEY UPDATE `{k}` = LAST_INSERT_ID(`{k}`), {cols_update}; SELECT LAS
         }
 
         public async Task<long> InsertOrUpdateAsync<T>(long id, object data) where T : class
-            => await InsertOrUpdateAsync<T>(new { id }, data);
+            => await InsertOrUpdateAsync<T>(new { Id = id }, data);
 
         public async Task<long> InsertOrUpdateAsync<T>(object data) where T : class
         {

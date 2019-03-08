@@ -47,7 +47,7 @@ namespace Dapper.Entity
 
         public static async Task<long> InsertOrUpdateAsync<T>(
             this DbSet<T> dbSet, long id, object data) where T : class
-            => await dbSet.InsertOrUpdateAsync(new { id }, data);
+            => await dbSet.InsertOrUpdateAsync(new { Id = id }, data);
 
         public static async Task<long> InsertOrUpdateAsync<T>(
             this DbSet<T> dbSet, object data) where T : class

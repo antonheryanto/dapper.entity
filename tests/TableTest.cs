@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace Dapper.Entity.Tests
@@ -16,7 +17,22 @@ namespace Dapper.Entity.Tests
                 Assert.True((await db.Menu.InsertAsync(m)) == 1, "row inserted");
                 Assert.True((await db.Menu.GetAsync(1)).Url == "#", "should has value");
             }
-        } 
+        }
+
+        [Fact] 
+        public async Task InsertOrUpdateAsync()
+        {
+            await InitDb();
+            using (var db = new Db(_option)) {
+                var a = new Menu { Id = 0, Url = "Insert" };
+                a.Id = (int)(await db.Menu.InsertOrUpdateAsync(a.Id, a));
+                a.Url = "Update";
+                a.Id = (int)(await db.Menu.InsertOrUpdateAsync(a.Id, a));
+
+                Assert.True(a.Id == 1, "row insert or updated");
+                Assert.True((await db.Menu.FindAsync(1)).Url == a.Url, "should has value");
+            }
+        }
 
         [Fact] 
         public async Task UpdateAsyncTest()
