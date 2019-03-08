@@ -12,7 +12,8 @@ namespace Dapper.Entity.Tests
         {
             await InitDb();
             using (var db = new Db(_option)) {
-                Assert.True((await db.Menu.InsertAsync(new {Url = "#"})) == 1, "row inserted");
+                var m = new Menu { Url = "#" };
+                Assert.True((await db.Menu.InsertAsync(m)) == 1, "row inserted");
                 Assert.True((await db.Menu.GetAsync(1)).Url == "#", "should has value");
             }
         } 

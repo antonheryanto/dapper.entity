@@ -1,5 +1,6 @@
 using Dapper;
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Data.Common;
 using System.Collections.Concurrent;
@@ -166,7 +167,11 @@ ON DUPLICATE KEY UPDATE `{k}` = LAST_INSERT_ID(`{k}`), {cols_update}; SELECT LAS
                 .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(p => p.GetGetMethod(false) != null))
             {
-                paramNames.Add(prop.Name);
+                var attribs = prop.GetCustomAttributes(typeof(NotMappedAttribute), true);
+                var attr = attribs.FirstOrDefault() as NotMappedAttribute;
+                if (attr == null) {
+                    paramNames.Add(prop.Name);
+                }
             }
             paramNameCache[o.GetType()] = paramNames;
             return paramNames;

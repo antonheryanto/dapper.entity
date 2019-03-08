@@ -1,5 +1,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dapper.Entity.Tests
 {
@@ -13,5 +14,7 @@ namespace Dapper.Entity.Tests
     {
         public int Id { get; set; }
         public string Url { get; set; }
+        [NotMapped]
+        public string Ignore { get; set; }
     }
 }
