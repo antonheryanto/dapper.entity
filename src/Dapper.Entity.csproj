@@ -8,7 +8,7 @@
     <Copyright>2019 Anton Heryanto Hasan</Copyright>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <!-- <MinClientVersion>3.6</MinClientVersion> -->
-    <VersionPrefix>0.2.5</VersionPrefix>
+    <VersionPrefix>0.2.6</VersionPrefix>
     <PackageId>Dapper.Entity</PackageId>
     <PackageTags>orm;sql;micro-orm;dapper;efcore</PackageTags>
     <PackageReleaseNotes>https://github.com/antonheryanto/dapper.entity</PackageReleaseNotes>
