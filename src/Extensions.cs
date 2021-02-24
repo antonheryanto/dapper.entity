@@ -59,7 +59,7 @@ namespace Dapper.Entity
 
         public static async Task<int> UpdateAsync<T>(
             this DbSet<T> dbSet, long id, object data) where T : class
-            => await dbSet.UpdateAsync(new { id }, data);
+            => await dbSet.UpdateAsync<T>(new { id }, data);
 
         public static async Task<bool> DeleteAsync<T>(
             this DbSet<T> dbSet, long id) where T : class

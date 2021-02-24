@@ -147,8 +147,9 @@ ON DUPLICATE KEY UPDATE `{k}` = LAST_INSERT_ID(`{k}`), {cols_update}; SELECT LAS
         {
             var type = typeof(T);
             if (tableNameMap.TryGetValue(type, out string name)) return name;
-            
-            name = Model.FindEntityType(type).Relational().TableName;            
+
+            //name = Model.FindEntityType(type).Relational().TableName;            
+            name = Model.FindEntityType(type).GetTableName();
             if (_lowerCaseTable) name = name?.ToLower();
 
             tableNameMap[type] = name;

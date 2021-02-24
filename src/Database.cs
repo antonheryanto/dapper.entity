@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Extensions;
+//using Microsoft.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -18,7 +18,7 @@ namespace Dapper.Entity
 {
     public partial class Database : DbContext
     {
-        bool _lowerCaseTable;
+        readonly bool _lowerCaseTable = false;
         Func<DatabaseFacade, DbConnection> _connectionFn = (db) => db.GetDbConnection();
         public Database(DbContextOptions options, 
             Func<DbConnection, DbConnection> dbWrapper = null,
@@ -31,57 +31,57 @@ namespace Dapper.Entity
 
         public Database(DbContextOptions options) : base(options) {}
 
-        DbConnection cn() => _connectionFn(Database);
+        DbConnection Cn() => _connectionFn(Database);
 
-        DbTransaction tx() => Database.CurrentTransaction?.GetDbTransaction();
+        DbTransaction Tx() => Database.CurrentTransaction?.GetDbTransaction();
 
         public async Task<List<dynamic>> QueryAsync(string sql, object param = null)
-            => (await cn().QueryAsync(sql, param, tx())).AsList();
+            => (await Cn().QueryAsync(sql, param, Tx())).AsList();
 
         public async Task<List<T>> QueryAsync<T>(
              string sql, object param = null)
-            => (await cn().QueryAsync<T>(sql, param, tx())).AsList();
+            => (await Cn().QueryAsync<T>(sql, param, Tx())).AsList();
 
         public async Task<T> QueryFirstOrDefaultAsync<T>(
              string sql, object param = null)
-            => (await cn().QueryFirstOrDefaultAsync<T>(sql, param, tx()));
+            => (await Cn().QueryFirstOrDefaultAsync<T>(sql, param, Tx()));
 
         public async Task<TReturn> QueryFirstOrDefaultAsync<TFirst, TSecond, TReturn>(
              string sql, Func<TFirst, TSecond, TReturn> map, object param = null)
-            => (await cn().QueryAsync<TFirst, TSecond, TReturn>(sql, map, param, tx())).FirstOrDefault();
+            => (await Cn().QueryAsync<TFirst, TSecond, TReturn>(sql, map, param, Tx())).FirstOrDefault();
 
         public async Task<List<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(
             string sql, Func<TFirst, TSecond, TReturn> map, dynamic param = null,
             IDbTransaction transaction = null, bool buffered = true,
             string splitOn = "Id", int? commandTimeout = null) =>
-            (await cn().QueryAsync(sql, map, param as object, transaction, buffered, splitOn, commandTimeout)).AsList();
+            (await Cn().QueryAsync(sql, map, param as object, transaction, buffered, splitOn, commandTimeout)).AsList();
 
         public async Task<List<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(
             string sql, Func<TFirst, TSecond, TThird, TReturn> map, dynamic param = null,
             IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null) =>
-            (await cn().QueryAsync(sql, map, param as object, transaction, buffered, splitOn, commandTimeout)).AsList();
+            (await Cn().QueryAsync(sql, map, param as object, transaction, buffered, splitOn, commandTimeout)).AsList();
 
         public async Task<List<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TReturn>(
             string sql, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, dynamic param = null,
             IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null) =>
-            (await cn().QueryAsync(sql, map, param as object, transaction, buffered, splitOn, commandTimeout)).AsList();
+            (await Cn().QueryAsync(sql, map, param as object, transaction, buffered, splitOn, commandTimeout)).AsList();
 
         public async Task<List<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(
             string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, dynamic param = null,
             IDbTransaction transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null) =>
-            (await cn().QueryAsync(sql, map, param as object, transaction, buffered, splitOn, commandTimeout)).AsList();
+            (await Cn().QueryAsync(sql, map, param as object, transaction, buffered, splitOn, commandTimeout)).AsList();
 
         public SqlMapper.GridReader QueryMultiple(
              string sql, object param = null)
-            => cn().QueryMultiple(sql, param, tx());
+            => Cn().QueryMultiple(sql, param, Tx());
 
         public async Task<SqlMapper.GridReader> QueryMultipleAsync(
              string sql, object param = null)
-            => await cn().QueryMultipleAsync(sql, param, tx());
+            => await Cn().QueryMultipleAsync(sql, param, Tx());
 
         public async Task<int> ExecuteAsync(
              string sql, object param = null)
-            => await cn().ExecuteAsync(sql, param, tx());
+            => await Cn().ExecuteAsync(sql, param, Tx());
 
     }
 }
