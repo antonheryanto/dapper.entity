@@ -1,31 +1,29 @@
-using Dapper;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data;
-using System.Data.Common;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Dapper.Entity
 {
     public partial class Database : DbContext
     {
+        public string Esc => DatabaseType switch {
+                DatabaseType.MySql => "`",
+                _ => "\"",
+            };
+
         public async Task<List<T>> AllAsync<T>(object where = null) where T : class
         {
             var tableName = GetTableName<T>();
-            var sql = $"SELECT * FROM `{tableName}`";
+            var sql = $"SELECT * FROM {Esc}{tableName}{Esc}";
             if (where == null) return await QueryAsync<T>(sql);
 
             var paramNames = GetParamNames(where);
-            var w = string.Join(" AND ", paramNames.Select(p => $"`{p}` = @{p}"));
+            var w = string.Join(" AND ", paramNames.Select(p => $"{Esc}{p}{Esc} = @{p}"));
             return await QueryAsync<T>($"{sql} WHERE {w}", where);
         }
 
@@ -33,15 +31,15 @@ namespace Dapper.Entity
         {
             var tableName = GetTableName<T>();
             var paramNames = GetParamNames(where);
-            var w = string.Join(" AND ", paramNames.Select(p => $"`{p}` = @{p}"));
-            var sql = $"SELECT * FROM `{tableName}` WHERE {w} LIMIT 1";
+            var w = string.Join(" AND ", paramNames.Select(p => $"{Esc}{p}{Esc} = @{p}"));
+            var sql = $"SELECT * FROM {Esc}{tableName}{Esc} WHERE {w} LIMIT 1";
             return await QueryFirstOrDefaultAsync<T>(sql, where);
         }
 
         public async Task<T> GetAsync<T>(long id) where T : class
         {
             var tableName = GetTableName<T>();
-            var sql = $"SELECT * FROM `{tableName}` WHERE id=@id";
+            var sql = $"SELECT * FROM {Esc}{tableName}{Esc} WHERE id=@id";
             return await QueryFirstOrDefaultAsync<T>(sql, new { id });
         }
 
@@ -51,41 +49,60 @@ namespace Dapper.Entity
             var paramNames = GetParamNames(data);
             paramNames.Remove("Id");
 
-            string cols = string.Join("`,`", paramNames);
-            string cols_params = string.Join(",", paramNames.Select(p => "@" + p));
-            var sql = $"INSERT INTO `{tableName}` (`{cols}`) VALUES ({cols_params}); SELECT LAST_INSERT_ID()";
+            string cols = string.Join($"{Esc},{Esc}", paramNames);
+            string cols_params = string.Join(",", paramNames.Select(p => $"@{p}"));
+            var afterInsert = DatabaseType == DatabaseType.SqlServer ? "Output Inserted.IdentityColumnName" : "";
+            var afterValue = DatabaseType switch {
+                DatabaseType.PostgreSql => "RETURNING id",
+                DatabaseType.MySql => "; SELECT LAST_INSERT_ID()",
+                DatabaseType.Sqlite => "; SELECT last_insert_rowid()",
+                _ => "",
+            };
+
+            var sql = $"INSERT INTO {Esc}{tableName}{Esc} ({Esc}{cols}{Esc}) {afterInsert} VALUES ({cols_params}) {afterValue}";
             return await QueryFirstOrDefaultAsync<long>(sql, data);
         }
 
+        //TODO: sqlite and sqlserver
         public async Task<long> InsertOrUpdateAsync<T>(object key, object data) where T : class
         {
             var tableName = GetTableName<T>();
             string k = GetParamNames(key).Single();  
             var paramNames = GetParamNames(data);
             paramNames.Remove(k);
-            string cols = string.Join("`,`", paramNames);
-            string cols_params = string.Join(",", paramNames.Select(p => "@" + p));
-            string cols_update = string.Join(",", paramNames.Select(p => $"`{p}` = @{p}"));
-            var sql = $@"
-INSERT INTO `{tableName}` (`{cols}`,`{k}`) VALUES ({cols_params}, @{k})
-ON DUPLICATE KEY UPDATE `{k}` = LAST_INSERT_ID(`{k}`), {cols_update}; SELECT LAST_INSERT_ID()";
+            string cols = string.Join($"{Esc},{Esc}", paramNames);
+            string cols_params = string.Join(",", paramNames.Select(p => $"@{p}"));
+            string cols_update = string.Join(",", paramNames.Select(p => $"{Esc}{p}{Esc} = @{p}"));
+            var insert = $"INSERT INTO {Esc}{tableName}{Esc} ({Esc}{cols}{Esc},{Esc}{k}{Esc}) VALUES ({cols_params}, @{k})";
+            var duplicate = DatabaseType switch {
+                DatabaseType.PostgreSql => $"ON CONFLICT (id) SET id = excluded.id, {cols_update} RETURNING id",
+                DatabaseType.MySql => $"ON DUPLICATE KEY UPDATE {Esc}{k}{Esc} = LAST_INSERT_ID({Esc}{k}{Esc}), {cols_update}; SELECT LAST_INSERT_ID()",
+                _ => "",
+            };
+
             var parameters = new DynamicParameters(data);
             parameters.AddDynamicParams(key);
 
-            return await QueryFirstOrDefaultAsync<long>(sql, parameters);
+            return await QueryFirstOrDefaultAsync<long>($"{insert} {duplicate}", parameters);
         }
 
         public async Task<long> InsertOrUpdateAsync<T>(long id, object data) where T : class
             => await InsertOrUpdateAsync<T>(new { Id = id }, data);
 
+        //TODO: sqlite and sqlserver
         public async Task<long> InsertOrUpdateAsync<T>(object data) where T : class
         {
             var tableName = GetTableName<T>();
             var paramNames = GetParamNames(data);
-            string cols = string.Join("`,`", paramNames);
-            string cols_params = string.Join(",", paramNames.Select(p => "@" + p));
-            string cols_update = string.Join(",", paramNames.Select(p => $"`{p}` = @{p}"));
-            var sql = $"INSERT INTO `{tableName}` (`{cols}`) VALUES ({cols_params}) ON DUPLICATE KEY UPDATE {cols_update}";
+            string cols = string.Join($"{Esc},{Esc}", paramNames);
+            string cols_params = string.Join(",", paramNames.Select(p => $"@{p}"));
+            string cols_update = string.Join(",", paramNames.Select(p => $"{Esc}{p}{Esc} = @{p}"));
+            var duplicate = DatabaseType switch {
+                DatabaseType.PostgreSql => $"ON CONFLICT (id) DO UPDATE SET",
+                DatabaseType.MySql => $"ON DUPLICATE KEY UPDATE",
+                _ => "",
+            };
+            var sql = $"INSERT INTO {Esc}{tableName}{Esc} ({Esc}{cols}{Esc}) VALUES ({cols_params}) {duplicate} {cols_update}";
 
             return await ExecuteAsync(sql, data);
         }
@@ -95,9 +112,9 @@ ON DUPLICATE KEY UPDATE `{k}` = LAST_INSERT_ID(`{k}`), {cols_update}; SELECT LAS
             var tableName = GetTableName<T>();
             var paramNames = GetParamNames(data);
             var keys = GetParamNames(where);
-            var cols_update = string.Join(",", paramNames.Select(p => $"`{p}`= @{p}"));
-            var cols_where = string.Join(" AND ", keys.Select(p => $"`{p}` = @{p}"));
-            var sql = $"UPDATE `{tableName}` SET {cols_update} WHERE {cols_where}";
+            var cols_update = string.Join(",", paramNames.Select(p => $"{Esc}{p}{Esc}= @{p}"));
+            var cols_where = string.Join(" AND ", keys.Select(p => $"{Esc}{p}{Esc} = @{p}"));
+            var sql = $"UPDATE {Esc}{tableName}{Esc} SET {cols_update} WHERE {cols_where}";
 
             var parameters = new DynamicParameters(data);
             parameters.AddDynamicParams(where);
@@ -111,15 +128,15 @@ ON DUPLICATE KEY UPDATE `{k}` = LAST_INSERT_ID(`{k}`), {cols_update}; SELECT LAS
         {
             var tableName = GetTableName<T>();
             return (await ExecuteAsync(
-                $"DELETE FROM `{tableName}` WHERE Id = @id", new { id })) > 0;
+                $"DELETE FROM {Esc}{tableName}{Esc} WHERE Id = @id", new { id })) > 0;
         }
         public async Task<bool> DeleteAsync<T>(object where) where T : class
         {
             var tableName = GetTableName<T>();
             var paramNames = GetParamNames(where);
-            var w = string.Join(" AND ", paramNames.Select(p => $"`{p}` = @{p}"));
+            var w = string.Join(" AND ", paramNames.Select(p => $"{Esc}{p}{Esc} = @{p}"));
             return (await ExecuteAsync(
-                $"DELETE FROM `{tableName}` WHERE {w}", where)) > 0;
+                $"DELETE FROM {Esc}{tableName}{Esc} WHERE {w}", where)) > 0;
         }
 
         public async Task<int> DeleteAsync<T>( T item) where T : class

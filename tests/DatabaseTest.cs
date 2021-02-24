@@ -10,7 +10,7 @@ namespace Dapper.Entity.Tests
 {
     public class DatabaseTest : BaseTest
     {
-        const string NAME = "DbTest";
+        const string NAME = "menuBase";
         public DatabaseTest() : base(NAME)
         {
 
@@ -80,9 +80,9 @@ namespace Dapper.Entity.Tests
             Assert.True(url == menu.Url, "row changes");
         }
 
-        ~DatabaseTest()
-        {
-            Drop();
-        }
+        // ~DatabaseTest()
+        // {
+        //     Drop();
+        // }
     }
 }

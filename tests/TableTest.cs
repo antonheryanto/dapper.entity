@@ -52,9 +52,9 @@ namespace Dapper.Entity.Tests
             Assert.Null((await db.Menu.GetAsync(1)));
         }
 
-        ~TableTest()
-        {
-            Drop();
-        }
+        // ~TableTest()
+        // {
+        //     Drop();
+        // }
     }
 }
