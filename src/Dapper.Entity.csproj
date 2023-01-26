@@ -6,9 +6,9 @@
     <Description>Dapper Helper For Entity Framework Core based on Dapper Rainbow</Description>
     <Authors>Anton Heryanto Hasan</Authors>
     <Copyright>2019 Anton Heryanto Hasan</Copyright>
-    <TargetFrameworks>netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <!-- <MinClientVersion>3.6</MinClientVersion> -->
-    <VersionPrefix>0.3.0</VersionPrefix>
+    <VersionPrefix>0.5.0</VersionPrefix>
     <PackageId>Dapper.Entity</PackageId>
     <PackageTags>orm;sql;micro-orm;dapper;efcore</PackageTags>
     <PackageReleaseNotes>https://github.com/antonheryanto/dapper.entity</PackageReleaseNotes>
@@ -24,10 +24,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.0.30" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.6.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.0.0" />
+    <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.2" />
   </ItemGroup>
   
 </Project>
